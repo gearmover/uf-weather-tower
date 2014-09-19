@@ -1,5 +1,4 @@
 [Hypervisor]
-Producers = "[S] Sin Wave 1,[S] Sin Wave 2"
-Consumers = "[C] Upload To Server"
+Modules = "Sin Wave 2,multiplexer.vi"
 TowerID = "Testing Tower"
 AccessPassword = "pass1234"
