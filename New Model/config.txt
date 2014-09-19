@@ -1,0 +1,5 @@
+[Hypervisor]
+Producers = "[S] Sin Wave 1,[S] Sin Wave 2"
+Consumers = "[C] Upload To Server"
+TowerID = "Testing Tower"
+AccessPassword = "pass1234"

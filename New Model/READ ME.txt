@@ -1,0 +1,65 @@
+Travis,
+
+This is the current state of the weather tower: I've got the framework in place, but the actual sensor correspondence I need to implement.  I'd like your help to get it done,
+I think it'd go alot faster with the two of us.  So here is how I've got this program laid out:
+
+The Hypervisor is the part of the program that runs first on the cRIO.  Right now I have it automatically load a config file (you'll have to tell it where the config file is, or where it should save it, or you'll get an error.) and then wait for input.  I've only programmed two 'plugin' modules so far: one's a generic sensor module, and the other a 
+generic log-to-file module.
+
+The config file looks like this:
+
+[Hypervisor]
+Producers = "Generic Sensor","Sensor2", *etc*
+Consumers = "Generic Logger","Logger2", *etc*
+TowerID = "Testing Tower"
+AccessPassword = "pass1234"
+
+NOTE: I've not actually tested with more than one module each, it shouldn't be an issue but I'll try it tonight.  The module names are very specific!  The VI that will be loaded and executed is called "Generic Sensor.vi" and "Generic Logger.vi", etc. and they need to be in the same directory as the Hypervisor.vi.  The program flow looks like this:
+
+
+
+Hypervisor -> Loads Config File -> Loads Producer Modules -> Runs in a loop servicing each module. The producers data is pushed to a main Data Queue the hypervisor holds,
+				-> Loads Consumer Modules 	and A SEPERATE COPY of the data queue is pushed to EACH consumer module as it comes in.
+
+There's some implications of this model, but it's the most general I could come up with.  Each consumer receives ALL the data in it's own queue, and it's responsible for chomping through the data at it's own pace, though if it's much slower than the producers, it's queue will grow until we run out of memory.  I've started to implement some safety checks but haven't finished them yet.
+
+Right now, the generic producer is simply sampling a sine wave every 5 milliseconds and passing it along.  The generic logger is logging to a database file THAT YOU MUST SELECT (open Generic Logger.vi), I usually put it in the same folder.
+
+There's a lot of framework code in there to handle things like crashes, debugging, pausing, unpausing, messages going back and forth from hypervisor to sensor to consumers, etc. that's currently not being used.
+
+The modules are ready to be implemented per-sensor.  I say it again, just COPY+PASTE each sensor VI for EVERY sensor (I haven't made them re-entrant [yet] so it can't load the same module more than once, it'll just block and wait for the other to close [which I programmed in as a 20 second kill switch]) - give each sensor a different name, etc.
+
+
+
+My development goals:
+	- Implement the exact sensors for those two towers that are already done
+		- I was going to read the serial port information from a file, that way the actual wiring doesn't matter, if sensor A goes to serial ports 20 and 26, just
+		  enter that in the config file, and make SensorA_Tower5.VI read those values from the config file and sample them.
+	- Fix the timestamp information
+		- if you check the database file after a while, you'll see it's recording milliseconds as seconds, and screwing everything up.  You'll still know what data
+		  comes before what, but actual time information is all messed up.
+	- Implement an upload to server consumer module
+		- this shouldn't be difficult, just create another consumer module, it'll get passed all the data just like any other, and instead of saving to file, have
+		  it upload to a server somewhere (read from config?)
+
+
+THINGS YOU NEED TO DO BEFORE IT'LL RUN IN THE FIRST PLACE:
+	- Hypervisor.vi - you need to select the config file on your machine (i.e. the path is relative to MY machine currently)
+	- Generic Logger.vi - you need to select the database save location on your machine (i.e. same thing, it's currently set to my machine)
+	- DOWNLOAD THE National Instruments as well as the OpenG plugin libraries (use the VI Package Manager, and sort by company, select ALL of them and DL.  They're very 		useful!)
+
+You can (and I highly recommend you do this) turn on execution highlighting for each module (in turn) and watch as it executes the code.  It'll give you a really good idea of how they work.  Feel free to give me a call or email if you need some help, and I think I commented the modules pretty well.  Let me know when you pick something to sink your teeth into, I recommend the sensor modules, because they're each very independent and you don't have to worry about me messing up your code as we move along.
+
+Let me know what you think.
+
+
+*******************************************************************************************************************************************************************************
+Developer Notes:
+-----------------
+
+The configuration file mustn't have any spaces in between multiple modules:
+
+"Sensor 1, Sensor 2"
+	  ^ WRONG!
+"Sensor 1,Sensor 2"
+	Correct!
