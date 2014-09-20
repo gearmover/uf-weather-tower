@@ -1,8 +1,8 @@
 [My Computer]
-My Computer = "10.72.1.59"
+My Computer = "10.136.41.127"
 
 [RT Industrial Controller Target]
-RT Industrial Controller Target = "10.55.55.113"
+RT Industrial Controller Target = "10.253.11.50"
 
 [RT PXI Target]
 RT PXI Target = "0.0.0.0"

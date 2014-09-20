@@ -1,0 +1,8 @@
+[My Computer]
+My Computer="10.136.41.127"
+
+[RT Industrial Controller Target]
+RT Industrial Controller Target="localhost"
+
+[RT PXI Target]
+RT PXI Target="0.0.0.0"
